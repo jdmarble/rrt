@@ -11,7 +11,8 @@ import System.Random
 
 import Data.SpatialIndex
 
-data Config state control index real edge = Config
+data (Real real, SpatialIndex index, Element index ~ state)
+    => Config state control index real edge = Config
     { -- | Propagation function
       propagation :: state -> control -> (edge, state)
       -- | Spatial index containing the initial state
@@ -31,7 +32,7 @@ controlEdgeProp = (ap (,) .)
 -- controls. The tree is returned as a list of (parent, edge, child)
 -- triples which can be used as-is or placed into a proper tree
 -- structure.
-search :: (Real r, SpatialIndex index, Element index ~ state)
+search :: (Real r, SpatialIndex index, Element index ~ state, Eq state)
        => Config state control index r edge -- ^ Configuration parameters
        -> [(state, [control])]        -- ^ Random states and controls
        -> [(edge, state)]             -- ^ Resulting tree as a list of nodes
@@ -41,7 +42,7 @@ search config stream = catMaybes $ fst
 
 
 -- | Make a single step in the RRT algorithm updating intermediate state.
-explore :: (Real r, SpatialIndex index, Element index ~ state)
+explore :: (Real r, SpatialIndex index, Element index ~ state, Eq state)
         => Config state control index r edge -- ^ Configuration parameters
         -> (state, [control])                -- ^ Random sample
         -> State index (Maybe (edge, state)) -- ^ New tree node
@@ -55,19 +56,24 @@ explore config sample =
 
 
 -- | Given a spatial index of all the states in a tree, return a new edge.
-expand :: (Real r, SpatialIndex index, Element index ~ state)
+expand :: (Real r, SpatialIndex index, Element index ~ state, Eq state)
        => Config state control index r edge -- ^ Configuration parameters
        -> index                       -- ^ For performing nearest neighbor query
        -> (state, [control])          -- ^ State to try to expand to using one
                                       -- of the possible controls
        -> Maybe (edge, state)         -- ^ New tree edge with new child node
-expand config index (sample, controls) = node
+expand config index (sample, controls) = if selfEdge then Nothing else node
     where
       parent = index `nearest` sample
       node = genChoices (propagation config parent)
                         (controlMetric config sample)
                         (not . collided config)
                         controls
+      selfEdge = if isJust node
+                   then (snd $ fromJust node) == parent -- Check for self edge
+                   else False
+                         -- Self-edge means prop couldn't advance the state
+                         -- This is such a mess. Do it in the Maybe monad.
 
 -- | 
 genChoices :: Real r
