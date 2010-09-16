@@ -16,6 +16,6 @@ tests = $(testGroupGenerator)
 
 
 prop_num_streams_eq_num_nodes stream = length tree == length stream
-    where config = Config (controlEdgeProp (+)) [0] distance $ const False
-          tree = search config stream
+    where config = Config (controlEdgeProp (+)) [0] distance
+          tree = maybeSearch config stream
           types = (stream :: [(Integer, [Integer])])

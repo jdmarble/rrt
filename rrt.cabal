@@ -1,6 +1,6 @@
 name: rrt
-version: 0.0.0.1
-description: Rapidly exploring Random Tree
+version: 0.0.0.2
+description: Rapidly-Exploring Random Tree
 
 license: BSD3
 license-file: LICENSE
