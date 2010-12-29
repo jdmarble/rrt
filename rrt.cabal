@@ -7,7 +7,7 @@ license-file: LICENSE
 copyright: J.D. Marble
 maintainer: jmarble@cse.unr.edu
 
-cabal-version: >= 1.8
+cabal-version: >= 1.10
 build-type: Simple
 
 
@@ -20,15 +20,18 @@ Library
                      , split ==0.1.*
                      , spatialIndex ==0.0.*
         ghc-options: -Wall
+        default-language: Haskell98
 
 
-Executable test
+Test-suite test
+        type: exitcode-stdio-1.0
         hs-source-dirs: test
         main-is: TestMain.hs
+        default-language: Haskell98
         build-depends: base ==4.*
                      , rrt ==0.0.*
                      , spatialIndex ==0.0.*
                      , test-framework ==0.3.*
                      , test-framework-th ==0.1.*
-                     , test-framework-quickcheck2 >=0.2.8 && <0.3
-                     , QuickCheck ==2.3.*
+                     , test-framework-quickcheck2 >=0.2.9 && <0.3
+                     , QuickCheck ==2.4.*
